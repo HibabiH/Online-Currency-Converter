@@ -11,6 +11,14 @@ The converter receives the names of currencies and the amount of money from the 
 
 Update Log
 ================================================================
+05.06.2023
+--------------------------------------
+Added GUI via JFrame.
+
 25.05.2023
 ---------------------------------------
 Function that gets exchange rate from Google website was moved to Runner.java class => ExchangeFunction.java wa deleted as unnecessary.
+
+24.05.2023
+----------------------------------------
+First functional code uploaded.
