@@ -4,11 +4,67 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.awt.BorderLayout;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.Scanner;
-
+import javax.swing.JTextField;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JTextArea;
+import static java.lang.System.exit;
 public class Runner {
+    JFrame f;
+    JTextArea textArea;
+    JTextField amount;
+    JTextField curr1;
+    JTextField curr2;
+    public Runner(){
+        f = new JFrame("A JFrame");
+        f.setSize(500, 500);
+        f.setLocation(300,200);
+        textArea = new JTextArea(10, 40);
+        curr1 = new JTextField("Enter currency to convert from: ",200);
+        curr2 = new JTextField("Enter currency to convert to: ", 200);
+        amount = new JTextField("Enter amount: ", 200);
+        JButton ExchangeButton = new JButton("Exchange");
+        JButton ExitButton = new JButton("Exit");
+        curr1.setBounds(0, 330, 200,40);
+        curr2.setBounds(0, 380, 200, 40);
+        amount.setBounds(300, 350, 200, 40);
+        ExchangeButton.addActionListener(e -> printResult());
+        ExitButton.addActionListener(e -> {
+            f.setVisible(false);
+            exit(0);
+        });
+        f.setVisible(true);
+        f.add(BorderLayout.AFTER_LAST_LINE,ExchangeButton);
+        f.add(BorderLayout.BEFORE_FIRST_LINE, ExitButton);
+        f.add(curr1);
+        f.add(curr2);
+        f.add(amount);
+        f.add(BorderLayout.CENTER, textArea);
+    }
+    public void printResult(){
+        textArea.setText("");
+        String currFrom = curr1.getText();
+        String currTo = curr2.getText();
+        double value;
+        try {
+            value = Double.parseDouble(amount.getText());
+        }catch (NumberFormatException exep){
+            textArea.append("ERROR: Amount must be a number");
+            return;
+        }
+        double rate;
+        try {
+            rate = getExchangeRate(currFrom, currTo);
+
+        } catch (IOException ex) {
+            textArea.append("ERROR: couldn't get info");
+            return;
+        }
+        String formatedStr = new DecimalFormat("#0.0000").format(value * rate);
+        textArea.append(value + " " + currFrom + " is equal to " + formatedStr + " " + currTo);
+    }
     public static double getExchangeRate(String convertFrom, String convertTo) throws IOException {
         String urlAddress = "https://www.google.com/finance/quote/" + convertFrom + "-" + convertTo;
         URL url;
@@ -21,7 +77,7 @@ public class Runner {
         BufferedReader reader = new BufferedReader(new InputStreamReader(is));
 
         String line;
-        String rateStr = null;
+        String rateStr = "";
         while ((line = reader.readLine()) != null) {
             if (line.contains("data-last-price=")) {
                 rateStr = line.substring(line.indexOf("data-last-price=") + 17, line.indexOf("data-last-price=") + 23);
@@ -36,31 +92,5 @@ public class Runner {
             System.out.println("ERROR: no exchange rate found, please check input");
         }
         return rate;
-    }
-    public static void main(String[] args) throws IOException {
-        System.out.println("Please input currency you want to convert from, then currency you want to convert to, then amount of money you want to convert:");
-        Scanner input = new Scanner(System.in);
-        ArrayList<String> data = new ArrayList<>();
-        for(int i = 0; i < 3; i++) {
-            data.add(input.nextLine());
-        }
-        data.set(0, data.get(0).toUpperCase());
-        data.set(1, data.get(1).toUpperCase());
-        double value;
-        try {
-            value = Double.parseDouble(data.get(2));
-        } catch (NumberFormatException e) {
-            System.out.println("ERROR: amount must be given as a number");
-            return;
-        }
-        if (value < 0) {
-            System.out.println("ERROR: amount of money must be greater or equal to zero");
-            return;
-        }
-        double rate = getExchangeRate(data.get(0), data.get(1));
-        String formatedRes = new DecimalFormat("#0.0000").format(value * rate);
-        if (rate > 0) {
-            System.out.println(data.get(2) + " " + data.get(0) + " is equal to " + formatedRes + " " + data.get(1));
-        }
     }
 }
